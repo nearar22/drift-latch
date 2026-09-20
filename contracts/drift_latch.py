@@ -60,10 +60,12 @@ def _classification(raw):
     return verdict
 
 
-def _fetch_receipt(raw_url, first, last):
+def _fetch_receipt(raw_url, first, last, cache_key):
+    fetch_url = raw_url + "?drift_latch=" + cache_key
+
     def fetch():
         try:
-            response = gl.nondet.web.get(raw_url)
+            response = gl.nondet.web.get(fetch_url)
         except Exception:
             return json.dumps({"availability": "FETCH_ERROR", "http_status": 0, "sha256": "", "excerpt": ""}, sort_keys=True)
         status = int(response.status)
@@ -118,7 +120,7 @@ class DriftLatch(gl.contract.Contract):
         if first < 1 or last < first or last - first > 19:
             raise gl.vm.UserError(EXPECTED + " Select one to twenty consecutive lines")
         material_rule = _text(material_rule, 500)
-        receipt = _fetch_receipt(raw_url, first, last)
+        receipt = _fetch_receipt(raw_url, first, last, watch_id + "-baseline")
         if receipt["availability"] != "OK":
             raise gl.vm.UserError(EXPECTED + " Baseline source is unavailable")
         record = {"id": watch_id, "title": title, "owner": gl.message.sender_address.as_hex,
@@ -141,7 +143,7 @@ class DriftLatch(gl.contract.Contract):
         if key in self.checks:
             raise gl.vm.UserError(EXPECTED + " Check ID already exists")
 
-        current = _fetch_receipt(watch["source_url"], watch["first_line"], watch["last_line"])
+        current = _fetch_receipt(watch["source_url"], watch["first_line"], watch["last_line"], check_id)
         baseline = watch["baseline"]
         if current["availability"] != "OK":
             verdict = "UNAVAILABLE"
@@ -194,7 +196,7 @@ class DriftLatch(gl.contract.Contract):
         check = self._check(watch_id, check_id)
         if check["adopted"] or check["verdict"] not in ("OUTSIDE_WINDOW", "EDITORIAL", "MATERIAL"):
             raise gl.vm.UserError(EXPECTED + " Check is not adoptable")
-        current = _fetch_receipt(watch["source_url"], watch["first_line"], watch["last_line"])
+        current = _fetch_receipt(watch["source_url"], watch["first_line"], watch["last_line"], check_id + "-adopt")
         if current != check["receipt"]:
             raise gl.vm.UserError(EXPECTED + " Source changed after this check")
         watch["baseline"] = current
