@@ -60,8 +60,10 @@ npm ci
 npm run deploy
 ```
 
-The finalized deployment and live mutation record will be added to `deployment.json` after the exact reviewed source is exercised on Studio Next.
+The verified Studio Next deployment is recorded in [`deployment.json`](deployment.json). Run `node scripts/verify.mjs` to fetch the deployed source and four transaction records again. The comparison is byte-for-byte, not just an address recorded in a manifest.
+
+The live exercise used an external text-only fixture at `https://drift-latch-feed.driftglass-cov.pages.dev/refund-policy.txt`. It is not a frontend, product website, or independent authority. The source initially said 30 days. A permissionless check after changing it to 7 days finalized with a `MATERIAL` verdict and `DRIFTED` state. Owner adoption refetched the same 7-day receipt, finalized, and rearmed the watch at baseline version 2.
 
 ## Trust boundary
 
-The watch owner chooses the source and materiality rule. DriftLatch proves what validators fetched and how the selected text changed relative to that rule. It does not prove that the GitHub owner is independent, that the publisher has legal authority, or that an off-chain system obeyed the policy. The included refund file is an operator-controlled demo fixture, labeled as such.
+The watch owner chooses the source and materiality rule. DriftLatch records what validators fetched and how the selected text changed relative to that rule. It does not prove that the publisher is independent, that the publisher has legal authority, or that an off-chain system obeyed the policy. The refund file and external feed are operator-controlled demo fixtures. The repository contains no frontend.

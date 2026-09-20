@@ -1,0 +1,31 @@
+{
+  "name": "DriftLatch",
+  "category": "Intelligent Contracts",
+  "account": "nearar22",
+  "repository": "https://github.com/nearar22/drift-latch",
+  "network": "Studio Next",
+  "chain_id": 61997,
+  "rpc": "https://studio-next.genlayer.com/api",
+  "explorer": "https://explorer-studio-dev.genlayer.com",
+  "reviewed_commit": "5c15c56b28eee2f6898bd134c7ce76b94e8c4bb3",
+  "contract_source_sha256": "dabd82264f5096ebb9db1c7efdb204f7adf97d1696daaaafb9b122e0f4c77461",
+  "contract_address": "0xAD8a4605A8382C6A6fA9487c8f30C822892cC571",
+  "demo_source": "https://drift-latch-feed.driftglass-cov.pages.dev/refund-policy.txt",
+  "demo_source_note": "Operator-controlled text-only test fixture, not a frontend or an independent authority",
+  "watch_id": "refund-policy",
+  "check_id": "deadline-cut-final",
+  "transactions": {
+    "deploy": "0xc8e0d776291089dc0dd794acbe0664031171f3ed4b91a215793da0ec3403a62f",
+    "baseline_30_days": "0xca686ea9dba72898c30f54d53ee324eb3c0bb624fdc6cd81934dd2f9922c203d",
+    "material_check_7_days": "0xe750d6e085c789b780a4abcd50c71ead5c0f99d4fa650078ce64aa6f03f6ec3d",
+    "adopt_7_days": "0x928d961ffbc0d001c4c1cefb7f8b95143075929b19322ff3846d6562ca7c1644"
+  },
+  "verification": {
+    "deployed_source_matches_repository_bytes": true,
+    "all_four_transactions_finalized_with_return": true,
+    "baseline_version_after_adoption": 2,
+    "final_watch_state": "MONITORED",
+    "direct_tests": "8 passed",
+    "genvm_lint": "3 passed"
+  }
+}
