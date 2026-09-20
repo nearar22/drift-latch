@@ -20,7 +20,7 @@ A material verdict changes the watch from `MONITORED` to `DRIFTED`. The owner ma
 
 The source receipt and the semantic decision have different consensus boundaries. `strict_eq` makes validators independently retrieve the exact HTTP status, whole-file SHA-256, and selected excerpt. Only after that receipt is stable does comparative consensus classify a changed excerpt. The only model-generated value stored is the bounded `EDITORIAL` or `MATERIAL` verdict. No unchecked explanation, score, or narrative can influence state.
 
-The URL parser accepts only HTTPS file endpoints on the exact GitHub Contents API host and path shape. It rejects credentials, ports, caller-controlled queries, fragments, traversal, and encoded path tricks. Each operation adds its own bounded cache key, then validators decode the API's base64 file content before hashing and comparing it.
+The URL parser accepts only HTTPS files on Cloudflare Pages. It rejects credentials, ports, caller-controlled queries, fragments, traversal, and encoded path tricks. Each operation adds its own bounded cache key. Publishers can apply `Cache-Control: no-store` so validators receive a fresh file without depending on a rate-limited API.
 
 ## Lifecycle
 

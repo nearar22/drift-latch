@@ -1,6 +1,5 @@
 # { "Depends": "py-genlayer:5jycge4q8k23462jtb0b9fyey1s9qz928sz2nbrd9mg4sxqg2qng" }
 import genlayer as gl
-import base64
 import hashlib
 import json
 import re
@@ -31,13 +30,14 @@ def _source_url(value):
     value = _text(value, 500)
     try:
         parsed = urlparse(value)
-        safe_authority = parsed.hostname == "api.github.com" and parsed.port is None and not parsed.username and not parsed.password
+        safe_authority = (parsed.hostname is not None and parsed.hostname.endswith(".pages.dev") and
+                          parsed.port is None and not parsed.username and not parsed.password)
     except Exception:
         raise gl.vm.UserError(EXPECTED + " Invalid source URL")
     if parsed.scheme != "https" or not safe_authority or parsed.query or parsed.fragment:
-        raise gl.vm.UserError(EXPECTED + " Source must be a GitHub Contents API URL")
+        raise gl.vm.UserError(EXPECTED + " Source must be an HTTPS Cloudflare Pages file")
     pieces = parsed.path.strip("/").split("/")
-    if (len(pieces) < 5 or pieces[0] != "repos" or pieces[3] != "contents" or
+    if (not parsed.path.startswith("/") or parsed.path.endswith("/") or
             any(not re.fullmatch(r"[A-Za-z0-9._-]+", item) or item in (".", "..") for item in pieces)):
         raise gl.vm.UserError(EXPECTED + " Invalid source path")
     return value
@@ -72,14 +72,9 @@ def _fetch_receipt(raw_url, first, last, cache_key):
         if status != 200:
             return json.dumps({"availability": "HTTP_ERROR", "http_status": status, "sha256": "", "excerpt": ""}, sort_keys=True)
         try:
-            if len(response.body) > 170000:
+            if len(response.body) > 120000:
                 return json.dumps({"availability": "BODY_LIMIT", "http_status": status, "sha256": "", "excerpt": ""}, sort_keys=True)
-            payload = json.loads(response.body.decode("utf-8"))
-            if (not isinstance(payload, dict) or payload.get("type") != "file" or
-                    payload.get("encoding") != "base64" or not isinstance(payload.get("content"), str)):
-                raise ValueError("Unexpected GitHub response")
-            encoded = "".join(payload["content"].split())
-            body = base64.b64decode(encoded, validate=True).decode("utf-8")
+            body = response.body.decode("utf-8")
         except Exception:
             return json.dumps({"availability": "DECODE_ERROR", "http_status": status, "sha256": "", "excerpt": ""}, sort_keys=True)
         if not body or len(body) > 120000:

@@ -1,9 +1,8 @@
 import importlib
-import base64
 import json
 
 CONTRACT = "contracts/drift_latch.py"
-URL = "https://api.github.com/repos/acme/policy/contents/rules.txt"
+URL = "https://policy-feed.pages.dev/rules.txt"
 BASE = "Refunds are available within 30 days.\nSupport is available by email."
 CHANGED = "Refunds are available within 7 days.\nSupport is available by email."
 RULE = "Treat changes to refund deadlines, eligibility, exclusions, or required steps as material."
@@ -12,9 +11,7 @@ RULE = "Treat changes to refund deadlines, eligibility, exclusions, or required 
 def web(vm, body=BASE, status=200, key="refund-rule-baseline"):
     # gltest matches web mocks by the canonical base URL and strips query parameters.
     # Production still receives the per-operation cache key appended by the contract.
-    payload = json.dumps({"type": "file", "encoding": "base64",
-                          "content": base64.b64encode(body.encode()).decode()})
-    vm.mock_web(URL, {"method": "GET", "status": status, "body": payload})
+    vm.mock_web(URL, {"method": "GET", "status": status, "body": body})
 
 
 def verdict(vm, value):
@@ -70,9 +67,9 @@ def test_explicit_unavailable_receipt(direct_vm, direct_deploy, direct_alice):
 
 def test_bad_source_and_unavailable_baseline_fail_closed(direct_vm, direct_deploy):
     contract = direct_deploy(CONTRACT)
-    with direct_vm.expect_revert("GitHub Contents API"):
-        contract.create_watch("bad-host", "Bad host", "https://api.github.com.evil.test/repos/acme/policy/contents/rules.txt", 1, 1, RULE)
-    with direct_vm.expect_revert("GitHub Contents API"):
+    with direct_vm.expect_revert("Cloudflare Pages"):
+        contract.create_watch("bad-host", "Bad host", "https://policy-feed.pages.dev.evil.test/rules.txt", 1, 1, RULE)
+    with direct_vm.expect_revert("Cloudflare Pages"):
         contract.create_watch("caller-query", "Caller query", URL + "?ref=main", 1, 1, RULE)
     web(direct_vm, "missing", 503, key="source-down-baseline")
     with direct_vm.expect_revert("Baseline source is unavailable"):

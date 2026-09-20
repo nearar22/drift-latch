@@ -10,7 +10,7 @@ if (!rawKey || !contract || !["baseline", "check", "adopt", "inspect"].includes(
 const key = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
 const chain = { ...studioDevnet, id: 61997, name: "GenLayer Studio Next", rpcUrls: { default: { http: ["https://studio-next.genlayer.com/api"] } } };
 const client = createClient({ chain, account: createAccount(key) });
-const source = "https://api.github.com/repos/nearar22/drift-latch/contents/fixtures/refund-policy.txt";
+const source = "https://drift-latch-feed.pages.dev/refund-policy.txt";
 const watchId = "refund-policy";
 const checkId = process.env.LIVE_CHECK_ID?.trim() || "deadline-cut";
 
