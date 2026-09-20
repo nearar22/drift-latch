@@ -1,0 +1,13 @@
+{
+  "name": "drift-latch-contract",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "deploy": "node scripts/deploy.mjs",
+    "live": "node scripts/live.mjs"
+  },
+  "dependencies": {
+    "genlayer-js": "2.0.0-rc.1"
+  }
+}

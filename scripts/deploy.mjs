@@ -1,0 +1,21 @@
+import { readFileSync } from "node:fs";
+import { createAccount, createClient, isSuccessful } from "genlayer-js";
+import { studioDevnet } from "genlayer-js/chains";
+
+const rawKey = process.env.GENLAYER_PRIVATE_KEY?.trim();
+if (!rawKey) throw new Error("GENLAYER_PRIVATE_KEY is required");
+const key = rawKey.startsWith("0x") ? rawKey : `0x${rawKey}`;
+const chain = { ...studioDevnet, id: 61997, name: "GenLayer Studio Next", rpcUrls: { default: { http: ["https://studio-next.genlayer.com/api"] } } };
+const client = createClient({ chain, account: createAccount(key) });
+const code = new Uint8Array(readFileSync(new URL("../contracts/drift_latch.py", import.meta.url)));
+const fees = await client.estimateTransactionFees({ leaderTimeunitsAllocation: 125n, validatorTimeunitsAllocation: 250n });
+const hash = await client.deployContract({ code, args: [], fees });
+console.log(`DEPLOY_TX=${hash}`);
+const receipt = await client.waitForTransactionReceipt({ hash, waitUntil: "finalized", retries: 240, interval: 3000, fullTransaction: true });
+const status = String(receipt.statusName ?? receipt.status ?? "unknown");
+const execution = String(receipt.txExecutionResultName ?? receipt.txExecutionResult ?? "unknown");
+console.log(`STATUS=${status};EXECUTION_RESULT=${execution}`);
+if (!isSuccessful(receipt) || status !== "FINALIZED" || execution !== "FINISHED_WITH_RETURN") throw new Error("Deployment did not finalize successfully");
+const address = receipt?.data?.contract_address ?? receipt?.txDataDecoded?.contractAddress;
+if (!address) throw new Error("Finalized receipt lacks contract address");
+console.log(`CONTRACT_ADDRESS=${address}`);
